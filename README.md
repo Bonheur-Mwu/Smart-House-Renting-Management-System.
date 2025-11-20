@@ -151,24 +151,24 @@ Think of the database as a super-organized filing cabinet 📂.It stores all inf
 The system has **7 core tables**, like organized folders for different rental information:
 
 1. **Owners:** Who owns the properties?
-owner_id (unique number), first_name (text, must have), last_name (text, must have), email (text, unique), phone_number (text), address (text), created_date (date, default today)
+- `owner_id (unique number), first_name (text, must have), last_name (text, must have), email (text, unique), phone_number (text), address (text), created_date (date, default today)`
 
 2. **Properties:** What houses are available?
-property_id (unique number), owner_id (links to owners), property_type (text, like "Apartment"), address (text, must have), city (text), monthly_rent (number, must be > 0), bedrooms (number), bathrooms (number), status (text, like "Available")
+- `property_id (unique number), owner_id (links to owners), property_type (text, like "Apartment"), address (text, must have), city (text), monthly_rent (number, must be > 0), bedrooms (number), bathrooms (number), status (text, like "Available")`
 
 3. **Tenants:** Who's renting?
-tenant_id (unique number), first_name (text, must have), last_name (text, must have), email (text, unique), phone_number (text), employment_info (text), emergency_contact (text), created_date (date, default today)
+- `tenant_id (unique number), first_name (text, must have), last_name (text, must have), email (text, unique), phone_number (text), employment_info (text), emergency_contact (text), created_date (date, default today)`
 4. **Lease_Agreements:** Who rented what?
-lease_id (unique number), property_id (links to properties), tenant_id (links to tenants), start_date (date, must have), end_date (date, must have), monthly_rent (number, must be > 0), security_deposit (number), lease_status (text, default "Active")
+- `lease_id (unique number), property_id (links to properties), tenant_id (links to tenants), start_date (date, must have), end_date (date, must have), monthly_rent (number, must be > 0), security_deposit (number), lease_status (text, default "Active")`
 
 5. **Rent_Payments:** Who paid when?
-payment_id (unique number), lease_id (links to leases), due_date (date, must have), amount_due (number, must be > 0), amount_paid (number), payment_date (date), payment_status (text, default "Pending"), late_fee (number, default 0)
+- `payment_id (unique number), lease_id (links to leases), due_date (date, must have), amount_due (number, must be > 0), amount_paid (number), payment_date (date), payment_status (text, default "Pending"), late_fee (number, default 0)`
 
 6. **Maintenance_Requests:** What needs fixing?
-request_id (unique number), property_id (links to properties), tenant_id (links to tenants), issue_type (text, like "Plumbing"), description (text, must have), priority (text, default "Medium"), status (text, default "Open"), completion_date (date)
+- `request_id (unique number), property_id (links to properties), tenant_id (links to tenants), issue_type (text, like "Plumbing"), description (text, must have), priority (text, default "Medium"), status (text, default "Open"), completion_date (date)`
 
 7. **Property_Viewings:** Who wants to see what?
-viewing_id (unique number), property_id (links to properties), tenant_id (links to tenants), scheduled_date (date, must have), status (text, default "Scheduled"), notes (text)
+- `viewing_id (unique number), property_id (links to properties), tenant_id (links to tenants), scheduled_date (date, must have), status (text, default "Scheduled"), notes (text)`
 
 ### 🔗 Relationships
 - One owner can own many properties (like one landlord, multiple houses)
