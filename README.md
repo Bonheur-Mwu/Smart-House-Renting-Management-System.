@@ -21,24 +21,24 @@ This House Rental Management System is a sophisticated database solution built w
 
 My system fixes that!
 
-1.Phase I: Problem Statement and Presentation
+1. Phase I: Problem Statement and Presentation
 
-2.Phase II: Business Process Modeling (MIS)
+2. Phase II: Business Process Modeling (MIS)
 
-3.Phase III: Logical Model Design
+3. Phase III: Logical Model Design
 
-4.Phase IV: Database Creation and Naming
+4. Phase IV: Database Creation and Naming
 
-5.Phase V: Table Implementation and Data Insertion
+5. Phase V: Table Implementation and Data Insertion
 
-6.Phase VI: Database Interaction and Transactions
+6. Phase VI: Database Interaction and Transactions
 
-7.Phase VII: Advanced Database Programming and Auditing
+7. Phase VII: Advanced Database Programming and Auditing
 
-8.Phase VIII: Documentation and Demonstration
+8. Phase VIII: Documentation and Demonstration
 
-9.Testing Results
-Conclusion
+9. Testing Results
+10. Conclusion
 
 ## 🎯 Phase I: What's the Problem? 😕
 
@@ -139,4 +139,7 @@ This platform connects to Management Information Systems (MIS), serving as the c
 
 - Analyzes rental yield and return on investment
 
-  
+ ### Picture of the Process
+ I’ll create a **BPMN diagram** (like a map of tasks) showing who does what:
+
+ <img width="5492" height="696" alt="BON BPNM" src="https://github.com/user-attachments/assets/76403b19-70bb-4b4c-9315-a639b47a1a22" />
