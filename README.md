@@ -171,21 +171,21 @@ request_id (unique number), property_id (links to properties), tenant_id (links 
 viewing_id (unique number), property_id (links to properties), tenant_id (links to tenants), scheduled_date (date, must have), status (text, default "Scheduled"), notes (text)
 
 ### 🔗 Relationships
-One owner can own many properties (like one landlord, multiple houses)
+- One owner can own many properties (like one landlord, multiple houses)
 
-One property can have many leases (rented by different tenants over time)
+- One property can have many leases (rented by different tenants over time)
 
-One tenant can have many maintenance requests (multiple issues during tenancy)
+- One tenant can have many maintenance requests (multiple issues during tenancy)
 
-One lease can have many rent payments (monthly payments over the lease term)
+- One lease can have many rent payments (monthly payments over the lease term)
 
-One property can have many viewings (shown to multiple potential tenants)
+- One property can have many viewings (shown to multiple potential tenants)
 
 ### 🧹 Keeping It Clean
 The database is organized to avoid chaos:
 
-✅ No repeats: Each owner's info stored once, referenced everywhere
-✅ Clear links: Every lease connects to both tenant and property
-✅ No confusion: Simple, direct data with clear relationships
-✅ Automatic tracking: System dates track when things happen
-✅ Status management: Current state always visible and updatable
+- ✅ No repeats: Each owner's info stored once, referenced everywhere
+- ✅ Clear links: Every lease connects to both tenant and property
+- ✅ No confusion: Simple, direct data with clear relationships
+- ✅ Automatic tracking: System dates track when things happen
+- ✅ Status management: Current state always visible and updatable
