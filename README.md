@@ -189,3 +189,4 @@ The database is organized to avoid chaos:
 - ✅ No confusion: Simple, direct data with clear relationships
 - ✅ Automatic tracking: System dates track when things happen
 - ✅ Status management: Current state always visible and updatable
+<img width="544" height="618" alt="image" src="https://github.com/user-attachments/assets/bf67dbdf-ee99-4a4b-b5fe-31257e184966" />
