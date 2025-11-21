@@ -193,3 +193,11 @@ The database is organized to avoid chaos:
 
 **Real-World Fact:** Well-organized databases can cut data errors by 90% in renting house, saving hours of managers and property owner's time (Database Management Trends, 2025).
 ## 💾 Phase IV: Setting Up the Database 🛠️
+Database is like the renting room. It needs a name, a key, and a way to watch it work.
+
+### Details. 
+
+- **Name:** wed_29337_Bonheur_HouseRMS_DB
+- **Password:** Bonheur
+- **Access:** Super Admin (full control)
+- **Tool:** Oracle Enterprise Manager (OEM) to check performance
