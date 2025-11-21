@@ -197,7 +197,13 @@ Database is like the renting room. It needs a name, a key, and a way to watch it
 
 ### Details. 
 
-- **Name:** wed_29337_Bonheur_HouseRMS_DB
+- **Name:** wed_29337_Bonheur_SMARTHRMS_DB
 - **Password:** Bonheur
 - **Access:** Super Admin (full control)
 - **Tool:** Oracle Enterprise Manager (OEM) to check performance
+<img width="1357" height="729" alt="PDBS 2" src="https://github.com/user-attachments/assets/1c678961-b571-44ca-ad29-5bba0c3415c2" />
+
+Real-World Facts: Tools like OEM help property managers spot maintenance patterns and payment trends early, reducing vacancy periods by 40% in professionally managed properties (Property Tech Analytics, 2025)
+
+<img width="1365" height="689" alt="OEM 2" src="https://github.com/user-attachments/assets/a50c7201-211e-44d8-9381-c0d1b5b6cc26" />
+
