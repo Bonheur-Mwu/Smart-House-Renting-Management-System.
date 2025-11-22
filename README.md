@@ -211,6 +211,7 @@ Real-World Facts: Tools like OEM help property managers spot maintenance pattern
 ### Creating Tables
 Here’s how I built the database’s “folders”
 
+```SQL
 CREATE TABLE owners (
     owner_id NUMBER PRIMARY KEY,
     first_name VARCHAR2(50) NOT NULL,
@@ -315,4 +316,5 @@ CREATE TABLE property_viewings (
     CONSTRAINT fk_viewing_property FOREIGN KEY (property_id) REFERENCES properties(property_id),
     CONSTRAINT fk_viewing_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id)
 );
+```
 
