@@ -318,3 +318,41 @@ CREATE TABLE property_viewings (
 );
 ```
 
+<img width="1361" height="725" alt="table creation" src="https://github.com/user-attachments/assets/aee82ace-6774-4246-8b86-008723c9ec6c" />
+
+### Adding Sample Data
+
+I added example info to test the system:
+
+```SQL
+INSERT INTO owners (owner_id, first_name, last_name, email, phone, address) VALUES 
+(1, 'James', 'Uwimana', 'j.uwimana@email.com', '+250788100100', 'KN 45 St, Kigali, Rwanda')
+(2, 'Marie', 'Umutoni', 'm.umutoni@email.com', '+250788200200', 'KK 15 Ave, Kigali, Rwanda');
+
+INSERT INTO properties (property_id, owner_id, property_type, address, city, state, bedrooms, bathrooms, monthly_rent, security_deposit, status) VALUES 
+(1, 1, 'Apartment', 'KN 45 St, Apt 3B', 'Kigali', 'Kigali', 2, 1, 350000, 350000, 'RENTED')
+(2, 2, 'House', 'KK 15 Ave, House 7', 'Kigali', 'Kigali', 3, 2, 600000, 600000, 'AVAILABLE');
+
+INSERT INTO tenants (tenant_id, first_name, last_name, email, phone, date_of_birth, employment_info, emergency_contact, emergency_phone) VALUES 
+(1, 'Alice', 'Uwase', 'a.uwase@email.com', '+250788500500', DATE '1995-03-15', 'Software Developer at K-Lab', 'John Uwase', '+250788500501')
+(2, 'Eric', 'Ndungutse', 'e.ndungutse@email.com', '+250788600600', DATE '1992-07-22', 'Teacher at GS Kicukiro', 'Marie Ndungutse', '+250788600601');
+
+INSERT INTO lease_agreements (lease_id, property_id, tenant_id, start_date, end_date, monthly_rent, security_deposit, deposit_paid_date, lease_status) VALUES 
+(1, 1, 1, DATE '2024-01-01', DATE '2024-12-31', 350000, 350000, DATE '2023-12-15', 'ACTIVE')
+(2, 2, 2, DATE '2024-02-01', DATE '2025-01-31', 600000, 600000, DATE '2024-01-20', 'ACTIVE');
+
+INSERT INTO rent_payments (payment_id, lease_id, payment_date, due_date, amount_due, amount_paid, payment_method, payment_status, late_fee) VALUES 
+(1, 1, DATE '2024-01-02', DATE '2024-01-01', 350000, 350000, 'Bank Transfer', 'PAID', 0)
+(2, 1, DATE '2024-02-05', DATE '2024-02-01', 350000, 350000, 'Mobile Money', 'PAID', 17500);
+
+INSERT INTO maintenance_requests (request_id, property_id, tenant_id, request_date, issue_type, description, priority, status, assigned_vendor, estimated_cost) VALUES 
+(1, 1, 1, DATE '2024-03-15', 'Plumbing', 'Kitchen sink is leaking and water pressure is low', 'HIGH', 'IN_PROGRESS', 'Kigali Plumbing Co.', 75000)
+(2, 2, 2, DATE '2024-02-10', 'Electrical', 'Bedroom light switch not working properly', 'MEDIUM', 'COMPLETED', 'Safe Electric Ltd.', 45000, DATE '2024-02-12');
+
+INSERT INTO property_viewings (viewing_id, property_id, tenant_id, scheduled_date, status, notes) VALUES 
+(1, 2, 1, DATE '2024-03-25', 'COMPLETED', 'Tenant interested in upgrading to larger property')
+(2, 2, 2, DATE '2024-03-28', 'SCHEDULED', 'Initial viewing for potential move');
+
+COMMIT;
+```
+<img width="1366" height="768" alt="data insertion" src="https://github.com/user-attachments/assets/581f459d-329e-4fdb-a657-19c7d6076ae8" />
