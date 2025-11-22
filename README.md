@@ -407,3 +407,6 @@ The final database design ensures:
 🏠 Improved query performance - Well-structured joins between normalized tables
 
 🏠 Solid foundation for the PL/SQL implementation phase
+
+## ⚙️ Phase VI: Using the Database 🚀
+
