@@ -207,3 +207,112 @@ Real-World Facts: Tools like OEM help property managers spot maintenance pattern
 
 <img width="1365" height="689" alt="OEM 2" src="https://github.com/user-attachments/assets/a50c7201-211e-44d8-9381-c0d1b5b6cc26" />
 
+## 🛠️ Phase V: Building Tables & Adding Info 📦
+### Creating Tables
+Here’s how I built the database’s “folders”
+
+CREATE TABLE owners (
+    owner_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50) NOT NULL,
+    last_name VARCHAR2(50) NOT NULL,
+    email VARCHAR2(100) UNIQUE NOT NULL,
+    phone VARCHAR2(20),
+    address VARCHAR2(200),
+    created_date DATE DEFAULT SYSDATE
+);
+
+CREATE TABLE properties (
+    property_id NUMBER PRIMARY KEY,
+    owner_id NUMBER NOT NULL,
+    property_type VARCHAR2(50) NOT NULL,
+    address VARCHAR2(200) NOT NULL,
+    city VARCHAR2(100) NOT NULL,
+    state VARCHAR2(50) NOT NULL,
+    zip_code VARCHAR2(20),
+    bedrooms NUMBER,
+    bathrooms NUMBER,
+    square_feet NUMBER,
+    monthly_rent NUMBER(10,2) NOT NULL,
+    security_deposit NUMBER(10,2),
+    available_date DATE,
+    status VARCHAR2(20) DEFAULT 'AVAILABLE',
+    description CLOB,
+    amenities VARCHAR2(500),
+    CONSTRAINT fk_property_owner FOREIGN KEY (owner_id) REFERENCES owners(owner_id)
+);
+
+
+CREATE TABLE tenants (
+    tenant_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50) NOT NULL,
+    last_name VARCHAR2(50) NOT NULL,
+    email VARCHAR2(100) UNIQUE NOT NULL,
+    phone VARCHAR2(20),
+    date_of_birth DATE,
+    employment_info VARCHAR2(200),
+    emergency_contact VARCHAR2(100),
+    emergency_phone VARCHAR2(20),
+    created_date DATE DEFAULT SYSDATE
+);
+
+
+CREATE TABLE lease_agreements (
+    lease_id NUMBER PRIMARY KEY,
+    property_id NUMBER NOT NULL,
+    tenant_id NUMBER NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    monthly_rent NUMBER(10,2) NOT NULL,
+    security_deposit NUMBER(10,2),
+    deposit_paid_date DATE,
+    lease_status VARCHAR2(20) DEFAULT 'ACTIVE', -- ACTIVE, EXPIRED, TERMINATED
+    created_date DATE DEFAULT SYSDATE,
+    CONSTRAINT fk_lease_property FOREIGN KEY (property_id) REFERENCES properties(property_id),
+    CONSTRAINT fk_lease_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id)
+);
+
+
+CREATE TABLE rent_payments (
+    payment_id NUMBER PRIMARY KEY,
+    lease_id NUMBER NOT NULL,
+    payment_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    amount_due NUMBER(10,2) NOT NULL,
+    amount_paid NUMBER(10,2),
+    payment_method VARCHAR2(50),
+    payment_status VARCHAR2(20) DEFAULT 'PENDING', -- PENDING, PAID, LATE, PARTIAL
+    late_fee NUMBER(8,2) DEFAULT 0,
+    notes VARCHAR2(500),
+    CONSTRAINT fk_payment_lease FOREIGN KEY (lease_id) REFERENCES lease_agreements(lease_id)
+);
+
+
+CREATE TABLE maintenance_requests (
+    request_id NUMBER PRIMARY KEY,
+    property_id NUMBER NOT NULL,
+    tenant_id NUMBER NOT NULL,
+    request_date DATE DEFAULT SYSDATE,
+    issue_type VARCHAR2(100) NOT NULL, -- Plumbing, Electrical, HVAC, etc.
+    description CLOB NOT NULL,
+    priority VARCHAR2(20) DEFAULT 'MEDIUM', -- LOW, MEDIUM, HIGH, URGENT
+    status VARCHAR2(20) DEFAULT 'OPEN', -- OPEN, IN_PROGRESS, COMPLETED, CANCELLED
+    assigned_vendor VARCHAR2(100),
+    estimated_cost NUMBER(8,2),
+    actual_cost NUMBER(8,2),
+    completion_date DATE,
+    CONSTRAINT fk_maintenance_property FOREIGN KEY (property_id) REFERENCES properties(property_id),
+    CONSTRAINT fk_maintenance_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id)
+);
+
+
+CREATE TABLE property_viewings (
+    viewing_id NUMBER PRIMARY KEY,
+    property_id NUMBER NOT NULL,
+    tenant_id NUMBER NOT NULL,
+    scheduled_date DATE NOT NULL,
+    status VARCHAR2(20) DEFAULT 'SCHEDULED', -- SCHEDULED, COMPLETED, CANCELLED
+    notes VARCHAR2(500),
+    CONSTRAINT fk_viewing_property FOREIGN KEY (property_id) REFERENCES properties(property_id),
+    CONSTRAINT fk_viewing_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id)
+);
+
