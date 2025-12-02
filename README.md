@@ -146,6 +146,45 @@ This platform connects to Management Information Systems (MIS), serving as the c
 
 ## 🗂️ Phase III: Planning the Database 📚
 
+## Database Normalization
+To ensure data integrity, reduce redundancy, and support a scalable design, the House Rental Management System database was normalized to the Third Normal Form (3NF). This process involved decomposing complex tables into simpler, well-structured relations with clear primary and foreign key constraints.
+
+### 🔹 1. First Normal Form (1NF)
+In this stage, all repeating groups and multivalued attributes were removed. Each table contains only atomic (indivisible) values.
+
+✅ Example: Instead of storing multiple maintenance issues in a single field, each maintenance request was given its own row with specific issue types and descriptions.
+
+text
+### 🔹 2. Second Normal Form (2NF)
+The database was further refined by removing partial dependencies. Attributes that depended on part of a composite primary key were moved to separate tables.
+
+✅ Example: Tenant personal information, which does not depend on the lease-property relationship, was moved to a separate Tenants table and linked via TenantID.
+
+### 🔹 3. Third Normal Form (3NF)
+Finally, transitive dependencies were eliminated. Non-key attributes were ensured to depend only on the primary key and not on other non-key attributes.
+
+✅ Example: The owner's contact details, which depend on OwnerID—not PropertyID—were placed in the Owners table. The Properties table only stores OwnerID that connects to owner information.
+
+### 🧩 Example of Normalized Tables:
+**Owners**
+OwnerID (PK), FirstName, LastName, Email, Phone, Address
+
+**Properties**
+PropertyID (PK), OwnerID (FK), PropertyType, Address, MonthlyRent, Status
+
+**Tenants**
+TenantID (PK), FirstName, LastName, Email, Phone, EmploymentInfo
+
+**Lease_Agreements**
+LeaseID (PK), PropertyID (FK), TenantID (FK), StartDate, EndDate, MonthlyRent
+
+**Rent_Payments**
+PaymentID (PK), LeaseID (FK), DueDate, AmountDue, PaymentStatus
+
+**Maintenance_Requests**
+RequestID (PK), PropertyID (FK), TenantID (FK), IssueType, Priority, Status
+
+
 Think of the database as a super-organized filing cabinet 📂.It stores all info in a way that’s easy to find and use.
 ### The Tables
 The system has **7 core tables**, like organized folders for different rental information:
@@ -357,43 +396,6 @@ COMMIT;
 ```
 <img width="1366" height="768" alt="data insertion" src="https://github.com/user-attachments/assets/581f459d-329e-4fdb-a657-19c7d6076ae8" />
 
-## Database Normalization
-To ensure data integrity, reduce redundancy, and support a scalable design, the House Rental Management System database was normalized to the Third Normal Form (3NF). This process involved decomposing complex tables into simpler, well-structured relations with clear primary and foreign key constraints.
-
-### 🔹 1. First Normal Form (1NF)
-In this stage, all repeating groups and multivalued attributes were removed. Each table contains only atomic (indivisible) values.
-
-✅ Example: Instead of storing multiple maintenance issues in a single field, each maintenance request was given its own row with specific issue types and descriptions.
-
-text
-### 🔹 2. Second Normal Form (2NF)
-The database was further refined by removing partial dependencies. Attributes that depended on part of a composite primary key were moved to separate tables.
-
-✅ Example: Tenant personal information, which does not depend on the lease-property relationship, was moved to a separate Tenants table and linked via TenantID.
-
-### 🔹 3. Third Normal Form (3NF)
-Finally, transitive dependencies were eliminated. Non-key attributes were ensured to depend only on the primary key and not on other non-key attributes.
-
-✅ Example: The owner's contact details, which depend on OwnerID—not PropertyID—were placed in the Owners table. The Properties table only stores OwnerID that connects to owner information.
-
-### 🧩 Example of Normalized Tables:
-**Owners**
-OwnerID (PK), FirstName, LastName, Email, Phone, Address
-
-**Properties**
-PropertyID (PK), OwnerID (FK), PropertyType, Address, MonthlyRent, Status
-
-**Tenants**
-TenantID (PK), FirstName, LastName, Email, Phone, EmploymentInfo
-
-**Lease_Agreements**
-LeaseID (PK), PropertyID (FK), TenantID (FK), StartDate, EndDate, MonthlyRent
-
-**Rent_Payments**
-PaymentID (PK), LeaseID (FK), DueDate, AmountDue, PaymentStatus
-
-**Maintenance_Requests**
-RequestID (PK), PropertyID (FK), TenantID (FK), IssueType, Priority, Status
 
 ### 🎯 Result:
 The final database design ensures:
@@ -409,4 +411,5 @@ The final database design ensures:
 🏠 Solid foundation for the PL/SQL implementation phase
 
 ## ⚙️ Phase VI: Using the Database 🚀
+
 
