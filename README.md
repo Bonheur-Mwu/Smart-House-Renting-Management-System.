@@ -639,7 +639,7 @@ END;
 
 ## Testing
 <img width="1131" height="650" alt="image" src="https://github.com/user-attachments/assets/09fe1740-27d0-4abc-89d9-8b0d2085c520" />
- See `total_amount_paid.png` for the function creation and a test query result (total_amount 250000 for guest_id 1).
+ See  `total_amount_paid.png`  for the function creation and a test query result (total_amount 250000 for guest_id 1).
 
 ## 6. Package Implementation
 Created a package `pkg_lease_management` to organize related procedures and functions.
@@ -760,3 +760,12 @@ END pkg_lease_management;
 <img width="1152" height="682" alt="package usage" src="https://github.com/user-attachments/assets/518f5e6c-99b2-4632-a671-c417ac79472e" />
 
 See `lease_management_package.png` for the package execution (Lease ID: 1, Total Due: 367,500.00; Status Change: TERMINATED, Property 1 set to AVAILABLE).
+
+# 🔒 Phase VII: Advanced Database Programming & Auditing 🕵️‍♂️
+##  1. The Critical Restriction Rule (Security Trigger) 🚨
+This addresses the non-negotiable security requirement to restrict DML operations based on time or conditions. We will implement a rule on the sensitive `RENT_PAYMENTS` table.
+-Rule: No user is allowed to DELETE any records from the RENT_PAYMENTS table on Weekends (Saturday or Sunday). This prevents accidental or malicious data removal during off-hours when supervisors may not be available.
+
+## Trigger Implementation: `trg_prevent_weekend_payment_delete`
+```sql
+
