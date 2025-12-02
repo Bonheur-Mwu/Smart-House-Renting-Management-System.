@@ -412,4 +412,351 @@ The final database design ensures:
 
 ## ⚙️ Phase VI: Using the Database 🚀
 
+The system isn’t just a box—it’s alive! It lets staff add, change, and check info easily.
 
+## DML(Data Definition Language)
+
+```SQL
+UPDATE properties SET status = 'AVAILABLE' WHERE property_id = 2;
+```
+<img width="1124" height="624" alt="update row" src="https://github.com/user-attachments/assets/bd23769b-92a7-4ee3-9ee5-c886d90bdd68" />
+
+## DDL(Data Definition Language)
+
+<img width="1132" height="647" alt="image" src="https://github.com/user-attachments/assets/e569ee61-ec30-426e-a6dd-2a1cbfabc94c" />
+# SMART PROCEDURE
+
+**Problem**
+Managers need to track the cumulative rent collected over time, partitioned by Property Type, to determine which property segments (e.g., 'Apartment' vs. 'House') generate the fastest or most consistent cash flow.
+
+**Solution**
+We use the SUM() Window Function partitioned by property_type to calculate the running total of amount_paid as payments are processed chronologically.
+
+``` sql
+SELECT
+    p.property_type,
+    py.payment_date,
+    py.amount_paid,
+    
+    SUM(py.amount_paid) OVER (
+        PARTITION BY p.property_type
+        ORDER BY py.payment_date
+    ) AS running_property_type_total
+FROM rent_payments py
+JOIN lease_agreements l ON py.lease_id = l.lease_id
+JOIN properties p ON l.property_id = p.property_id
+WHERE py.payment_status = 'PAID' 
+ORDER BY p.property_type, py.payment_date;
+```
+<img width="1134" height="628" alt="image" src="https://github.com/user-attachments/assets/e0f39077-1ac3-4f82-a8e8-c395ab4575ac" />
+
+## 3. Procedure Implementation
+```sql
+CREATE OR REPLACE PROCEDURE proc_update_maintenance_status (
+    p_request_id      IN NUMBER,
+    p_new_status      IN VARCHAR2,
+    p_actual_cost     IN NUMBER DEFAULT NULL,
+    p_completion_date IN DATE DEFAULT NULL
+)
+IS
+    v_current_status maintenance_requests.status%TYPE;
+    e_invalid_status EXCEPTION;
+    PRAGMA EXCEPTION_INIT(e_invalid_status, -20001);
+BEGIN
+   
+    SELECT status INTO v_current_status
+    FROM maintenance_requests
+    WHERE request_id = p_request_id;
+    
+ 
+    IF p_new_status = 'COMPLETED' THEN
+        IF p_actual_cost IS NULL OR p_completion_date IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20002, 'Completion requires actual cost and completion date.');
+        END IF;
+
+        UPDATE maintenance_requests
+        SET 
+            status = p_new_status,
+            actual_cost = p_actual_cost,
+            completion_date = p_completion_date
+        WHERE request_id = p_request_id;
+
+    ELSIF p_new_status IN ('IN_PROGRESS', 'CANCELLED', 'OPEN') THEN
+     
+        UPDATE maintenance_requests
+        SET status = p_new_status
+        WHERE request_id = p_request_id;
+    
+    ELSE
+      
+        RAISE e_invalid_status;
+    END IF;
+
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Maintenance Request ID ' || p_request_id || ' updated successfully to ' || p_new_status || '.');
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+       
+        DBMS_OUTPUT.PUT_LINE('Error: Maintenance Request ID ' || p_request_id || ' does not exist.');
+        ROLLBACK;
+    WHEN e_invalid_status THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Invalid status provided. Use OPEN, IN_PROGRESS, CANCELLED, or COMPLETED.');
+        ROLLBACK;
+    WHEN OTHERS THEN
+ 
+        DBMS_OUTPUT.PUT_LINE('System Error updating maintenance request: ' || SQLERRM);
+        ROLLBACK;
+END;
+/
+```
+<img width="1131" height="631" alt="image" src="https://github.com/user-attachments/assets/1d4f4cb8-3230-47b8-aef3-a0ffd14fbca6" />
+
+## Call Procedure
+
+```sql
+BEGIN
+    proc_update_maintenance_status(
+        p_request_id => 1,
+        p_new_status => 'COMPLETED',
+        p_actual_cost => 75000,
+        p_completion_date => SYSDATE
+    );
+END;
+/
+```
+<img width="1130" height="621" alt="image" src="https://github.com/user-attachments/assets/52f1a3f8-34eb-4dbe-bbe0-836f0d5f3fcc" />
+
+## 4. Implementation with Cursor: Listing Available Properties for Rent 🏠
+
+Create a PL/SQL block that uses an Explicit Cursor to retrieve and display key details for all properties that currently have an availability_status of 'AVAILABLE'. This is a core function for the property viewing module.
+```sql
+ SET SERVEROUTPUT ON; 
+
+DECLARE
+    -- Explicit Cursor: Selects all available properties, ordered by rent
+    CURSOR c_available_properties IS
+        SELECT property_id, address, city, monthly_rent
+        FROM properties
+        WHERE status = 'AVAILABLE'
+        ORDER BY monthly_rent ASC;
+
+    -- Local variables to hold fetched data
+    v_property_id   properties.property_id%TYPE;
+    v_address       properties.address%TYPE;
+    v_city          properties.city%TYPE;
+    v_monthly_rent  properties.monthly_rent%TYPE;
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('--- Available Properties for Immediate Rent ---');
+    DBMS_OUTPUT.PUT_LINE('---------------------------------------------');
+
+    OPEN c_available_properties;
+
+    LOOP
+        FETCH c_available_properties INTO v_property_id, v_address, v_city, v_monthly_rent;
+
+        EXIT WHEN c_available_properties%NOTFOUND;
+
+        -- Display the result 
+        DBMS_OUTPUT.PUT_LINE(
+            'ID: ' || v_property_id || 
+            ' | Rent: ' || TO_CHAR(v_monthly_rent, '9,999,999.00') || 
+            ' | Location: ' || v_address || ', ' || v_city
+        );
+    END LOOP;
+
+    CLOSE c_available_properties;
+    
+    DBMS_OUTPUT.PUT_LINE('---------------------------------------------');
+    DBMS_OUTPUT.PUT_LINE('Total available properties found: ' || c_available_properties%ROWCOUNT);
+
+EXCEPTION
+    WHEN OTHERS THEN
+        IF c_available_properties%ISOPEN THEN
+            CLOSE c_available_properties;
+        END IF;
+        DBMS_OUTPUT.PUT_LINE('System Error during property listing: ' || SQLERRM);
+END;
+/
+```
+<img width="1135" height="647" alt="image" src="https://github.com/user-attachments/assets/85a111dc-601d-4581-be84-422119bbd1d6" />
+
+See `available_properties_cursor.png` for the cursor execution (Property IDs: 3, 2, 4; Rent Range: 250,000.00 to 1,500,000.00; Location: Kigali).
+
+## 5. Function Implementation
+
+Created a function that calculates the total cumulative outstanding balance (the sum of amount_due for PENDING/LATE/PARTIAL payments plus any associated late_fee) for a specific tenant across all their active leases.
+
+```sql
+ CREATE OR REPLACE FUNCTION func_is_tenant_high_risk (
+    p_tenant_id IN NUMBER
+) 
+RETURN VARCHAR2 -- Returns 'YES' or 'NO'
+IS
+    v_urgent_request_count NUMBER;
+    v_total_overdue_amount NUMBER;
+    v_max_monthly_rent     NUMBER; -- Max rent to use as the threshold
+
+BEGIN
+    -- 1. Check Maintenance Risk (More than one URGENT request)
+    SELECT COUNT(*)
+    INTO v_urgent_request_count
+    FROM maintenance_requests
+    WHERE tenant_id = p_tenant_id
+    AND priority = 'URGENT'
+    AND status != 'COMPLETED';
+
+    IF v_urgent_request_count > 1 THEN
+        RETURN 'YES - Multiple Urgent Maintenance';
+    END IF;
+
+    -- 2. Check Financial Risk (Overdue amount > 1 month's rent)
+    -- a. Get the tenant's highest monthly rent (as a strict threshold)
+    SELECT MAX(monthly_rent)
+    INTO v_max_monthly_rent
+    FROM lease_agreements
+    WHERE tenant_id = p_tenant_id
+    AND lease_status = 'ACTIVE';
+
+    v_total_overdue_amount := func_calculate_tenant_overdue(p_tenant_id);
+
+    IF v_max_monthly_rent IS NOT NULL AND v_total_overdue_amount > v_max_monthly_rent THEN
+        RETURN 'YES - Significant Financial Risk';
+    END IF;
+
+    RETURN 'NO';
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'NO - Tenant Not Found/No Active Lease';
+    WHEN OTHERS THEN
+        RETURN 'ERROR';
+END;
+/
+```
+<img width="1130" height="645" alt="image" src="https://github.com/user-attachments/assets/467a96c0-9156-4aa2-ba44-b0a2b64e239e" />
+
+## Testing
+<img width="1131" height="650" alt="image" src="https://github.com/user-attachments/assets/09fe1740-27d0-4abc-89d9-8b0d2085c520" />
+ See `total_amount_paid.png` for the function creation and a test query result (total_amount 250000 for guest_id 1).
+
+## 6. Package Implementation
+Created a package `pkg_lease_management` to organize related procedures and functions.
+
+```sql
+CREATE OR REPLACE PACKAGE pkg_lease_management AS
+    FUNCTION func_total_due_for_lease(p_lease_id IN NUMBER) RETURN NUMBER;
+    
+    PROCEDURE proc_update_lease_status(p_lease_id IN NUMBER, p_new_status IN VARCHAR2);
+    
+    PROCEDURE proc_list_expiring_leases;
+END pkg_lease_management;
+/
+CREATE OR REPLACE PACKAGE BODY pkg_lease_management AS
+
+    
+    FUNCTION func_total_due_for_lease(p_lease_id IN NUMBER) 
+    RETURN NUMBER
+    IS
+        v_total_due NUMBER := 0;
+    BEGIN
+        -- Sums the total outstanding balance (amount_due + late_fee) for a specific lease.
+        SELECT 
+            SUM(rp.amount_due + rp.late_fee)
+        INTO v_total_due
+        FROM rent_payments rp
+        WHERE rp.lease_id = p_lease_id
+        AND rp.payment_status IN ('PENDING', 'LATE', 'PARTIAL');
+
+       
+        RETURN NVL(v_total_due, 0);
+
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN 0;
+        WHEN OTHERS THEN
+            RETURN -1; -- Error code
+    END func_total_due_for_lease;
+    
+    PROCEDURE proc_update_lease_status(p_lease_id IN NUMBER, p_new_status IN VARCHAR2)
+    IS
+        v_old_property_id properties.property_id%TYPE;
+        e_invalid_status EXCEPTION;
+    BEGIN
+    
+        IF p_new_status NOT IN ('ACTIVE', 'EXPIRED', 'TERMINATED') THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Invalid lease status: ' || p_new_status);
+        END IF;
+        
+        SELECT property_id INTO v_old_property_id
+        FROM lease_agreements
+        WHERE lease_id = p_lease_id;
+        
+        UPDATE lease_agreements
+        SET lease_status = p_new_status
+        WHERE lease_id = p_lease_id;
+        
+        IF SQL%ROWCOUNT = 0 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'Lease ID ' || p_lease_id || ' not found.');
+        END IF;
+        
+        IF p_new_status IN ('EXPIRED', 'TERMINATED') THEN
+            UPDATE properties
+            SET status = 'AVAILABLE'
+            WHERE property_id = v_old_property_id;
+        END IF;
+
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Lease ID ' || p_lease_id || ' updated to ' || p_new_status || ' and property status updated if required.');
+
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            DBMS_OUTPUT.PUT_LINE('Error: Lease ID ' || p_lease_id || ' not found.');
+            ROLLBACK;
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('System Error: ' || SQLERRM);
+            ROLLBACK;
+    END proc_update_lease_status;
+
+    
+    PROCEDURE proc_list_expiring_leases
+    IS
+        v_expiring_date CONSTANT DATE := TRUNC(SYSDATE + 60); -- Next 60 days
+    BEGIN
+        DBMS_OUTPUT.PUT_LINE('--- Leases Expiring by ' || TO_CHAR(v_expiring_date, 'YYYY-MM-DD') || ' ---');
+        
+        
+        FOR rec IN (
+            SELECT 
+                l.lease_id, 
+                t.first_name || ' ' || t.last_name AS tenant_name, 
+                l.end_date, 
+                p.address
+            FROM lease_agreements l
+            JOIN tenants t ON l.tenant_id = t.tenant_id
+            JOIN properties p ON l.property_id = p.property_id
+            WHERE l.lease_status = 'ACTIVE'
+            AND l.end_date BETWEEN TRUNC(SYSDATE) AND v_expiring_date
+            ORDER BY l.end_date ASC
+        )
+        LOOP
+            DBMS_OUTPUT.PUT_LINE('Lease ' || rec.lease_id || 
+                                ' | Tenant: ' || rec.tenant_name || 
+                                ' | Expires: ' || TO_CHAR(rec.end_date, 'DD-MON-YY') || 
+                                ' | Property: ' || rec.address);
+        END LOOP;
+        
+        DBMS_OUTPUT.PUT_LINE('--------------------------------------------------');
+
+    END proc_list_expiring_leases;
+
+END pkg_lease_management;
+/
+```
+<img width="1366" height="656" alt="image" src="https://github.com/user-attachments/assets/49f5a018-1acb-417a-bf09-6ba35431c62b" />
+
+## Package Usage
+<img width="1152" height="682" alt="package usage" src="https://github.com/user-attachments/assets/518f5e6c-99b2-4632-a671-c417ac79472e" />
+
+See `lease_management_package.png` for the package execution (Lease ID: 1, Total Due: 367,500.00; Status Change: TERMINATED, Property 1 set to AVAILABLE).
