@@ -876,3 +876,27 @@ END;
 /
 ```
 <img width="959" height="370" alt="tgr auding maintenance update" src="https://github.com/user-attachments/assets/431ed4bc-0883-44cb-8a41-783266f094e3" />
+
+```sql
+UPDATE maintenance_requests
+SET 
+    status = 'COMPLETED',             
+    actual_cost = 450000.00,          
+    completion_date = SYSDATE         
+WHERE request_id = 1;
+
+**Result:** Hooray! The auditing mechanism worked flawlessly! The system successfully logged the update to Maintenance Request 1, capturing the status change to 'COMPLETED' and the final cost of 450,000.00, ensuring a full audit trail for all operational changes in the Smart House Renting Management System.
+```
+<img width="1153" height="656" alt="audit logs" src="https://github.com/user-attachments/assets/07a88a8e-4118-4f71-b625-307b9cdd0d86" />
+
+- Then I checked the `audit_logs` table:
+  ```sql
+  SELECT status, trigger_name
+FROM user_triggers
+WHERE trigger_name = 'TRG_AUDIT_MAINTENANCE_UPDATE';
+SELECT request_id, status, actual_cost
+FROM maintenance_requests
+WHERE request_id = 1;
+  ```
+  <img width="1152" height="673" alt="image" src="https://github.com/user-attachments/assets/65065029-3c04-4927-8aec-37d6b6cefd5e" />
+
