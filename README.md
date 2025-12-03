@@ -762,10 +762,117 @@ END pkg_lease_management;
 See `lease_management_package.png` for the package execution (Lease ID: 1, Total Due: 367,500.00; Status Change: TERMINATED, Property 1 set to AVAILABLE).
 
 # 🔒 Phase VII: Advanced Database Programming & Auditing 🕵️‍♂️
-##  1. The Critical Restriction Rule (Security Trigger) 🚨
+## 1. Auditing Implementation: Creating the Audit Table 📝
+The foundation of auditing is a central log table that tracks all critical changes across the system. This table is named `AUDIT_LOGS`
+```sql
+CREATE TABLE audit_logs (
+    audit_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    table_name VARCHAR2(50) NOT NULL,
+    operation_type VARCHAR2(10) NOT NULL,
+    key_value NUMBER,                   
+    old_value CLOB,
+    new_value CLOB,
+    changed_by VARCHAR2(100) DEFAULT USER,
+    change_date TIMESTAMP DEFAULT SYSTIMESTAMP
+);
+```
+<img width="959" height="485" alt="audit logs" src="https://github.com/user-attachments/assets/9b9480c1-58e3-49d5-82fd-c219eec1f0a6" />
+
+## 2. Trigger Implementation ⚙️
+We implement three types of triggers to enforce security, automate business rules, and log changes.
+
+## 2.1. The Critical Restriction Rule (Security Trigger) 🚨
 This addresses the non-negotiable security requirement to restrict DML operations based on time or conditions. We will implement a rule on the sensitive `RENT_PAYMENTS` table.
 -Rule: No user is allowed to DELETE any records from the RENT_PAYMENTS table on Weekends (Saturday or Sunday). This prevents accidental or malicious data removal during off-hours when supervisors may not be available.
 
 ## Trigger Implementation: `trg_prevent_weekend_payment_delete`
 ```sql
+CREATE OR REPLACE TRIGGER trg_prevent_weekend_payment_delete
+BEFORE DELETE ON rent_payments 
+BEGIN
+    IF TO_CHAR(SYSDATE, 'DY', 'NLS_DATE_LANGUAGE=ENGLISH') IN ('SAT', 'SUN') THEN
+        RAISE_APPLICATION_ERROR(-20015, 
+            'CRITICAL RESTRICTION RULE VIOLATION: Deletion of RENT_PAYMENTS records is prohibited on weekends (Saturday/Sunday).'
+        );
+    END IF;
+END;
+/
+```
+<img width="959" height="370" alt="tgr auding maintenance update" src="https://github.com/user-attachments/assets/81516315-bdda-4b20-ad2f-cb0abb325efb" />
+## 2.2. Business Logic Triggers (Automation)
 
+**Trigger 1: Automatic Late Fee Calculation**
+
+Automates the calculation of the late fee (5% of amount_due) and sets the payment_status when a payment date is recorded.
+```sql
+CREATE OR REPLACE TRIGGER trg_auto_late_fee
+BEFORE INSERT OR UPDATE OF payment_date ON rent_payments
+FOR EACH ROW 
+DECLARE
+    c_late_fee_rate CONSTANT NUMBER := 0.05;
+BEGIN
+    IF :NEW.payment_date IS NOT NULL THEN
+        
+        IF TRUNC(:NEW.payment_date) > TRUNC(:NEW.due_date) THEN
+            :NEW.late_fee := :NEW.amount_due * c_late_fee_rate;
+            :NEW.payment_status := 'LATE';
+        ELSE
+            :NEW.late_fee := 0;
+            :NEW.payment_status := 'PAID';
+        END IF;
+
+    ELSIF :NEW.payment_date IS NULL AND :NEW.payment_status IS NULL THEN
+        :NEW.payment_status := 'PENDING';
+        :NEW.late_fee := 0;
+    END IF;
+END;
+/
+```
+<img width="959" height="370" alt="tgr auto late fee" src="https://github.com/user-attachments/assets/fc704063-b036-4bc1-9a78-f3f8282e9d2f" />
+
+**Trigger 2: Automatic Property Status Update**
+
+- Ensures that when a lease terminates or expires, the system automatically flags the property as AVAILABLE.
+
+```sql
+CREATE OR REPLACE TRIGGER trg_lease_status_to_property
+AFTER UPDATE OF lease_status ON lease_agreements
+FOR EACH ROW
+BEGIN
+    IF :NEW.lease_status IN ('EXPIRED', 'TERMINATED') AND :OLD.lease_status = 'ACTIVE' THEN
+        UPDATE properties
+        SET status = 'AVAILABLE'
+        WHERE property_id = :NEW.property_id;
+    END IF;
+END;
+/
+```
+<img width="959" height="479" alt="tgr lease status" src="https://github.com/user-attachments/assets/65ad0295-e216-43aa-a9a8-9c5f605a0575" />
+
+**2.3. Auditing Trigger (Data Integrity)**
+
+- This trigger logs changes to the critical MAINTENANCE_REQUESTS table, specifically tracking changes to the status and actual_cost.
+
+```sql
+CREATE OR REPLACE TRIGGER trg_audit_maintenance_update
+AFTER UPDATE ON maintenance_requests
+FOR EACH ROW
+BEGIN
+    -- Check if status or actual_cost changed (equivalent to IS DISTINCT FROM)
+    IF (OLD.status != NEW.status OR 
+        (OLD.actual_cost != NEW.actual_cost OR (OLD.actual_cost IS NULL != NEW.actual_cost IS NULL)))
+    THEN
+        INSERT INTO audit_logs (
+            table_name, operation_type, key_value, old_value, new_value
+        ) VALUES (
+            'MAINTENANCE_REQUESTS', 
+            'UPDATE', 
+            :OLD.request_id,
+            'Status: ' || :OLD.status || ' | Cost: ' || TO_CHAR(:OLD.actual_cost), 
+            'Status: ' || :NEW.status || ' | Cost: ' || TO_CHAR(:NEW.actual_cost)  
+        );
+    END IF;
+END;
+/
+```
+<img width="959" height="370" alt="tgr auding maintenance update" src="https://github.com/user-attachments/assets/431ed4bc-0883-44cb-8a41-783266f094e3" />
