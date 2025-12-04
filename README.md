@@ -895,7 +895,7 @@ WHERE request_id = 1;
 
 **Result:** The auditing mechanism worked flawlessly! The system successfully logged the update to Maintenance Request 1, capturing the status change to 'COMPLETED' and the final cost of 450,000.00, ensuring a full audit trail for all operational changes in the Smart House Renting Management System.
 ```
-<img width="1153" height="656" alt="audit logs" src="https://github.com/user-attachments/assets/07a88a8e-4118-4f71-b625-307b9cdd0d86" />
+<img width="1151" height="681" alt="image" src="https://github.com/user-attachments/assets/d6049072-0a8d-444b-884c-196dc8457f44" />
 
 - Then I checked the `audit_logs` table:
 ```sql
