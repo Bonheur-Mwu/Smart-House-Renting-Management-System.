@@ -414,7 +414,7 @@ The final database design ensures:
 
 The system isn’t just a box—it’s alive! It lets staff add, change, and check info easily.
 
-## DML(Data Definition Language)
+## DML(Data Manipulation Language)
 
 ```SQL
 UPDATE properties SET status = 'AVAILABLE' WHERE property_id = 2;
@@ -424,7 +424,8 @@ UPDATE properties SET status = 'AVAILABLE' WHERE property_id = 2;
 ## DDL(Data Definition Language)
 
 <img width="1132" height="647" alt="image" src="https://github.com/user-attachments/assets/e569ee61-ec30-426e-a6dd-2a1cbfabc94c" />
-# SMART PROCEDURE
+
+## SMART PROCEDURE
 
 **Problem**
 Managers need to track the cumulative rent collected over time, partitioned by Property Type, to determine which property segments (e.g., 'Apartment' vs. 'House') generate the fastest or most consistent cash flow.
@@ -515,17 +516,22 @@ END;
 ## Call Procedure
 
 ```sql
+DECLARE
+    v_request_id maintenance_requests.request_id%TYPE := 1;
+    v_status maintenance_requests.status%TYPE := 'COMPLETED';
+    v_cost maintenance_requests.actual_cost%TYPE := 85000;
+    v_completion_date DATE := DATE '2024-03-25';
 BEGIN
     proc_update_maintenance_status(
-        p_request_id => 1,
-        p_new_status => 'COMPLETED',
-        p_actual_cost => 75000,
-        p_completion_date => SYSDATE
+        p_request_id => v_request_id,
+        p_new_status => v_status,
+        p_actual_cost => v_cost,
+        p_completion_date => v_completion_date
     );
 END;
 /
 ```
-<img width="1130" height="621" alt="image" src="https://github.com/user-attachments/assets/52f1a3f8-34eb-4dbe-bbe0-836f0d5f3fcc" />
+<img width="1157" height="684" alt="image" src="https://github.com/user-attachments/assets/48de49f8-340e-458d-b0cb-582b21419a0b" />
 
 ## 4. Implementation with Cursor: Listing Available Properties for Rent 🏠
 
@@ -639,7 +645,8 @@ END;
 
 ## Testing
 <img width="1131" height="650" alt="image" src="https://github.com/user-attachments/assets/09fe1740-27d0-4abc-89d9-8b0d2085c520" />
- See  `total_amount_paid.png`  for the function creation and a test query result (total_amount 250000 for guest_id 1).
+
+See  `total_amount_paid.png`  for the function creation and a test query result (total_amount 250000 for guest_id 1).
 
 ## 6. Package Implementation
 Created a package `pkg_lease_management` to organize related procedures and functions.
@@ -799,6 +806,7 @@ END;
 /
 ```
 <img width="959" height="370" alt="tgr auding maintenance update" src="https://github.com/user-attachments/assets/81516315-bdda-4b20-ad2f-cb0abb325efb" />
+
 ## 2.2. Business Logic Triggers (Automation)
 
 **Trigger 1: Automatic Late Fee Calculation**
@@ -885,18 +893,56 @@ SET
     completion_date = SYSDATE         
 WHERE request_id = 1;
 
-**Result:** Hooray! The auditing mechanism worked flawlessly! The system successfully logged the update to Maintenance Request 1, capturing the status change to 'COMPLETED' and the final cost of 450,000.00, ensuring a full audit trail for all operational changes in the Smart House Renting Management System.
+**Result:** The auditing mechanism worked flawlessly! The system successfully logged the update to Maintenance Request 1, capturing the status change to 'COMPLETED' and the final cost of 450,000.00, ensuring a full audit trail for all operational changes in the Smart House Renting Management System.
 ```
 <img width="1153" height="656" alt="audit logs" src="https://github.com/user-attachments/assets/07a88a8e-4118-4f71-b625-307b9cdd0d86" />
 
 - Then I checked the `audit_logs` table:
-  ```sql
-  SELECT status, trigger_name
+```sql
+SELECT status, trigger_name
 FROM user_triggers
 WHERE trigger_name = 'TRG_AUDIT_MAINTENANCE_UPDATE';
 SELECT request_id, status, actual_cost
 FROM maintenance_requests
 WHERE request_id = 1;
-  ```
-  <img width="1152" height="673" alt="image" src="https://github.com/user-attachments/assets/65065029-3c04-4927-8aec-37d6b6cefd5e" />
+```
+<img width="1152" height="673" alt="image" src="https://github.com/user-attachments/assets/65065029-3c04-4927-8aec-37d6b6cefd5e" />
 
+# 🛡️ Tracking System: The Audit Log.
+
+- **What It Tracks:** Who performed a database modification (INSERT/UPDATE/DELETE), when they did it, and if the transaction was blocked by a business rule (like the weekday restriction).
+
+- **Why It Matters:** Keeps the rental system secure from mistakes, fraudulent transactions (like unauthorized changes to lease terms or rent amounts), and internal data manipulation.
+
+- **Real-World Fact:** Over 70% of major property managers report an increase in fraudulent rental applications, leading to estimated annual losses in the billions of dollars globally. My auditing system provides a critical layer of defense against financial and data fraud! (NMHC Report, 2023).
+
+# What We Learned from Testing.
+
+- ✅ The weekday DML block rule works—it successfully blocks unauthorized changes to sensitive tables (like LEASES or PAYMENTS) during busy operational hours on days like Monday and Friday.
+- ✅ It permits system administrators and users to perform necessary updates on weekends (Sunday), making it the designated period for maintenance and large data fixes.
+- ✅ The holiday block rule protects key financial data on special days like Heroes Day, preventing accidental or malicious transactions.
+- ✅ Every attempted and successful change is logged in the AUDIT_LOG table, providing a clear, non-repudiable audit trail.
+- ✅ Even failed attempts (the blocked transactions) are captured, keeping everything transparent and secure for legal compliance.
+
+These triggers are the Property Manager's Audit Tool—always watching, always protecting the integrity of the rental portfolio! 🦸‍♂️
+
+# 📞 Let’s Talk! 📲
+
+**Detail  Information**
+
+**Author:**          MWUNGERI Bonheur
+
+**Email:**           mwungeribonheur250@gmail.com
+
+**Student ID:**      29337
+
+**Institution:**     AUCA - Faculty of Information Technology
+
+**Supervisor:**      Eric Maniraguha (eric.maniraguha@auca.ac.rw)
+#
+#
+**Status:**          ✅ All Done!
+
+**Last Updated:**    "December 4, 2025 (Current Date)"
+
+This is my final exam for INSY 8311, built with passion, and a dream to make property renting secure and amazingly efficient!
