@@ -142,8 +142,8 @@ This platform connects to Management Information Systems (MIS), serving as the c
  ### Picture of the Process
  I’ll create a **BPMN diagram** (like a map of tasks) showing who does what:
 
- <img width="5492" height="696" alt="BON BPNM" src="https://github.com/user-attachments/assets/76403b19-70bb-4b4c-9315-a639b47a1a22" />
-
+![BPMN](https://github.com/user-attachments/assets/db0550d3-85cf-41aa-aaa7-fc8bdda34253)
+ 
 ## 🗂️ Phase III: Planning the Database 📚
 
 ## Database Normalization
